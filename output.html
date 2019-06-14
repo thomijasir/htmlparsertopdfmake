@@ -1,0 +1,190 @@
+<html>
+
+	<head>
+		<title>Document PDF</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<script src='pdfmake.js'></script>
+		<script src='vfs_fonts.js'></script>
+		<script src='content.js'></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+		<script src="https://cdn.jsdelivr.net/jsbarcode/3.6.0/barcodes/JsBarcode.code39.min.js" type="text/javascript"></script>
+		<script src='htmlparsertopdfmake.js'></script>
+	</head>
+
+	<body>
+		<div id="pdfFrame"></div>
+	</body>
+	<script>
+
+
+	function footerDynamic(pageNum, totalPages) {
+		var pageData = 
+			{
+				docId: "1212211",
+				pageNow: pageNum,
+				totalPage: totalPages
+			};
+		var pageBarcodeString = "";
+		var pageNumber = "";
+		if (pageData.pageNow == "") {
+			pageBarcodeString = pageData.docId;
+		} else {
+			pageBarcodeString = pageData.pageNow + "-" + pageData.totalPage + "-" + pageData.docId;
+			pageNumber = "Page " + pageData.pageNow + "/" + pageData.totalPage;
+		}
+
+		var footData = [];
+		footData.push({
+			canvas: [{
+				type: 'line',
+				x1: 30,
+				y1: 0,
+				x2: 560,
+				y2: 0,
+				lineWidth: 1,
+				lineColor: '#dddddd'
+			}]
+		});
+		footData.push({
+			columns: [{
+				width: '*',
+				image: textToBase64Barcode(pageBarcodeString),
+				width: 160,
+				height: 25,
+				margin: [38, 5, 0, 0]
+			},
+			{
+				width: '*',
+				table: {
+					widths: ['*', '*', '*'],
+					body: [
+						[
+							{ text: ["Kode Agen : ", { text: '00811117' }], fontSize: 10, border: [false, false, false, false] },
+							{ text: ['12/12/2019'], fontSize: 10, border: [false, false, false, false] },
+							{ text: [pageNumber], alignment: "right", fontSize: 10, border: [false, false, false, false] }
+						],
+						[
+							{ text: [pageData.docId], fontSize: 10, border: [false, false, false, false] },
+							{ text: ['aLKsi78'], fontSize: 10, border: [false, false, false, false] },
+							{ text: ['SQS.v2.0'], alignment: "right", fontSize: 10, border: [false, false, false, false] }
+						],
+					]
+				},
+				margin: [45, 5, 40, 0]
+			}
+
+			]
+		});
+
+		return footData;
+	}
+
+	var contentDocument = createDocumentDefinition(newTableHTML + '<br>' +newListHtml + '<br>' +simpleHtm + '<br>' + small_html);
+
+	var docDefinition = {
+		pageSize: 'A4',
+    pageOrientation: 'portrait',
+    pageMargins: [ 30, 40, 30, 40 ],
+		footer: function (pageNo, totalPages, footerMode, cc) {
+			return footerDynamic(pageNo, totalPages);
+		},
+		
+		header: function (pageNo, totalPages, footerMode) {
+
+			var headerContract = {
+				alignment: 'justify',
+				columns: [
+					{
+						image: logoPru,
+						width: 110,
+						margin: [40, 10, 0, 0]
+					},
+				{
+					text: [
+						'HALAMAN INI MERUPAKAN BAGIAN DARI KONTRAK ASURANSI'
+					],
+					style: 'header1',
+				}
+
+				]
+			};
+
+			var header2 = {
+				canvas: [{
+					type: 'line',
+					x1: 30,
+					y1: 0,
+					x2: 560,
+					y2: 0,
+					lineWidth: 1,
+					lineColor: '#dddddd'
+				}]
+			};
+			return [headerContract, header2];
+		},
+		content: contentDocument,
+		styles: {
+			header: {
+				fontSize: 18,
+				bold: true,
+				color: '#ff0000',
+				margin: [40, 10, 0, 0]
+			},
+			header1: {
+				fontSize: 7,
+				bold: false,
+				alignment: 'right',
+				margin: [0, 20, 35, 0]
+			},
+			subheader1: {
+				fontSize: 9,
+				color: '#212121'
+			},
+			profil: { fontSize: 8, },
+			profilBold: { fontSize: 8, bold: true, },
+			hal4Table: { fontSize: 5, margin: [0, 0, 10, 0] },
+			hal3Table: { fontSize: 6, },
+			hal6Tabel: { fontSize: 6, margin: [0, 0, 10, 0] },
+			pengecualian: { fontSize: 5, },
+			lineSpacing: { margin: [0, 0, 0, 6] },
+			itemsTableHeader: {
+				bold: true, fontSize: 13, color: 'black'
+			},
+			totalsTable: {
+				bold: true,
+				margin: [0, 30, 0, 0]
+			},
+			rightme: {
+				alignment: 'right',
+				margin: [100, 0, 0, 0]
+			},
+			redBar: {
+				fillColor: 'red',
+				color: 'white',
+			},
+			redBarText: {
+				margin: 5,
+			}
+
+		},
+		defaultStyle: {
+			fontSize: 8,
+			color: 'black'
+		}
+			
+	};
+
+	console.log('Document Definition: ', docDefinition);
+	
+	// PDF Convert + Append
+	const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+	pdfDocGenerator.getDataUrl((dataUrl) => {
+		const targetElement = document.querySelector('#pdfFrame');
+		const iframe = document.createElement('iframe');
+		iframe.style.width="100%";
+		iframe.style.height="100%";
+		iframe.src = dataUrl;
+		targetElement.appendChild(iframe);
+	});
+	</script>
+</html>
